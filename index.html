@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard</title>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #apiResults {
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+    }
+
+    #apiResults table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    #apiResults th, #apiResults td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd; /* Add bottom border */
+    }
+
+    #apiResults th {
+      background-color: #f2f2f2;
+    }
+
+    #apiResults td:first-child {
+      width: 10%; /* Adjust width of rank column */
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Leaderboard API</h1>
+
+  <!-- Button to display current week leaderboard -->
+  <button onclick="getCurrentWeekLeaderboard()">Get Current Week Leaderboard</button>
+
+  <!-- Button to display last week leaderboard by country -->
+  <button onclick="getLastWeekLeaderboardByCountry()">Get Last Week Leaderboard by Country</button>
+
+  <!-- Button to fetch user rank -->
+  <button onclick="getUserRank()">Fetch User Rank</button>
+
+  <!-- Container to display API results -->
+  <div id="apiResults"></div>
+
+  <script>
+    function getCurrentWeekLeaderboard() {
+      fetch('/leaderboard')
+        .then(response => response.json())
+        .then(data => {
+          displayResults(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function getLastWeekLeaderboardByCountry() {
+      const country = prompt('Enter country name (e.g., India):');
+      if (!country) return;
+
+      fetch(`/leaderboard/${country}`)
+        .then(response => response.json())
+        .then(data => {
+          displayResults(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function getUserRank() {
+      const userId = prompt('Enter user ID:');
+      if (!userId) return;
+
+      fetch(`/${userId}/rank`)
+        .then(response => response.json())
+        .then(data => {
+          alert('User rank: ' + data.rank);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function displayResults(data) {
+      const apiResults = document.getElementById('apiResults');
+      apiResults.innerHTML = ''; // Clear previous results
+    
+      if (data && data.length > 0) {
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+
+        // Create table header row
+        const headerRow = document.createElement('tr');
+        const rankHeader = document.createElement('th');
+        rankHeader.textContent = 'Rank';
+        const nameHeader = document.createElement('th');
+        nameHeader.textContent = 'Name';
+        const scoreHeader = document.createElement('th');
+        scoreHeader.textContent = 'Score';
+        headerRow.appendChild(rankHeader);
+        headerRow.appendChild(nameHeader);
+        headerRow.appendChild(scoreHeader);
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body rows
+        data.forEach((item, index) => {
+          const row = document.createElement('tr');
+          const rankCell = document.createElement('td');
+          rankCell.textContent = index + 1; // Increment index to get rank
+          const nameCell = document.createElement('td');
+          nameCell.textContent = item.Name;
+          const scoreCell = document.createElement('td');
+          scoreCell.textContent = item.Score;
+          row.appendChild(rankCell);
+          row.appendChild(nameCell);
+          row.appendChild(scoreCell);
+          tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        apiResults.appendChild(table);
+      } else {
+        apiResults.textContent = 'No data available.';
+      }
+    }
+    
+  </script>
+</body>
+</html>
